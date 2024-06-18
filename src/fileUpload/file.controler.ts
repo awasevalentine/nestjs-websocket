@@ -8,7 +8,7 @@ import {
   } from '@nestjs/common';
   import { FileInterceptor } from '@nestjs/platform-express';
   import { Express } from 'express';
-  import { SampleDto } from './dto/sample.dto';
+  import { FileUploadDto, SampleDto } from './dto/sample.dto';
   import { multerConfig } from './multer.config'; // Import the multer configuration
   
   @Controller('file-upload')
@@ -18,16 +18,16 @@ import {
     @UseInterceptors(FileInterceptor('file', multerConfig))
     @Post('file')
     uploadFile(
-      @Body() payload: SampleDto,
-      @UploadedFile() file: Express.Multer.File,
+      @Body() payload: FileUploadDto,
+      @UploadedFile() file: FileUploadDto,
     ) {
       return {
         payload,
         file: {
-          originalname: file.originalname,
-          filename: file.filename,
-          path: file.path,
-          mimetype: file.mimetype,
+          originalname: file.file.originalname,
+          filename: file.file.filename,
+          path: file.file.path,
+          mimetype: file.file.mimetype,
         },
       };
     }
@@ -35,7 +35,7 @@ import {
     @UseInterceptors(FileInterceptor('file', multerConfig))
     @Post('file/pass-validation')
     uploadFileAndPassValidation(
-      @Body() body: SampleDto,
+      @Body() body: FileUploadDto,
       @UploadedFile(
         new ParseFilePipeBuilder()
           .addFileTypeValidator({
@@ -45,18 +45,18 @@ import {
             fileIsRequired: false,
           }),
       )
-      file?: Express.Multer.File,
+      file?: FileUploadDto,
     ) {
       return {
         body,
-        file: file?.buffer.toString(),
+        file: file.file?.buffer.toString(),
       };
     }
   
     @UseInterceptors(FileInterceptor('file', multerConfig))
     @Post('file/fail-validation')
     uploadFileAndFailValidation(
-      @Body() body: SampleDto,
+      @Body() body: FileUploadDto,
       @UploadedFile(
         new ParseFilePipeBuilder()
           .addFileTypeValidator({
@@ -64,11 +64,11 @@ import {
           })
           .build(),
       )
-      file: Express.Multer.File,
+      file: FileUploadDto,
     ) {
       return {
         body,
-        file: file.buffer.toString(),
+        file: file.file.buffer.toString(),
       };
     }
   }

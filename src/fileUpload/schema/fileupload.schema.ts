@@ -29,6 +29,9 @@ export class FileUploadEntity{
     @Column()
     mimetype: string;
 
+    @Column({nullable: true})
+    sender?: string
+
     @Column({type: 'bytea'})
     data: Buffer
 }

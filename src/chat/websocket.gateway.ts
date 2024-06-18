@@ -14,12 +14,22 @@ import { ChatService } from './service/chat.service';
 import { ChatDto } from './dto/chat.dto';
 
 @WebSocketGateway(8081, {})
-export class ChatGateWay {
+export class ChatGateWay implements OnModuleInit {
   // export class ChatGateWay implements OnGatewayDisconnect, OnModuleInit {
   @WebSocketServer()
   server: Server;
 
   constructor(private readonly messageService: ChatService) {}
+
+  onModuleInit() {
+      this.server.on('connection', (socket)=>{
+        socket.broadcast.emit('join', {
+            message: `User with following Id ${socket.id} Joined the chat`
+        })
+        console.log("the user", socket.id)
+        return `User with the following id ${socket.id} Joined`
+      })
+  }
 
   @SubscribeMessage('createMessage')
   async create(@MessageBody() createMessageDto: ChatDto) {
